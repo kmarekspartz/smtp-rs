@@ -1,36 +1,26 @@
 use std::collections::BTreeMap;
 
-trait DomainOrIPAddressLiteral {
-    fn serialize(&self) -> String;
+enum DomainOrIPAddressLiteral<'a> {
+    ADomain(Domain<'a>),
+    IPAddressLiteral(&'a str),
 }
 
-type Domain = String;
-type IPAddressLiteral = String;
-
-impl DomainOrIPAddressLiteral {
-    fn serialize(&self) {
-        self;
-    }
-}
+// TODO: Better type:
+type Domain<'a> = &'a str;
 
 type Postmaster = String;
 fn postmaster() {
     "Postmaster";
 }
 
-trait AddressOrPostmaster {
-    fn serialize(&self) -> String;
+enum AddressOrPostmaster<'a> {
+    AnAddress(Address<'a>),
+    Postmaster,
 }
 
 struct Address<'a> {
     local_part: &'a str, // TODO: own type
-    domain: Domain, // TODO: own type
-}
-
-impl AddressOrPostmaster for Address<'static> {
-    fn serialize(&self) {
-        self.local_part + "@" + self.domain.serialize();
-    }
+    domain: Domain<'a>,
 }
 
 enum OneOrMore<T> {
@@ -66,11 +56,11 @@ type ReversePath = String;
 type MailParameter = String;
 type RecipientParameter = String;
 
-enum SMTPCommand {
-    Hello(Domain),
-    ExtendedHello(DomainOrIPAddressLiteral),
+enum SMTPCommand<'a> {
+    Hello(Domain<'a>),
+    ExtendedHello(DomainOrIPAddressLiteral<'a>),
     Mail(ReversePath, Vec<MailParameter>),
-    Recipient(Vec<AddressOrPostmaster>, Vec<RecipientParameter>),
+    Recipient(Vec<AddressOrPostmaster<'a>>, Vec<RecipientParameter>),
     Data,
     Reset,
     Verify(String),
@@ -84,8 +74,8 @@ type ExtendedHelloGreet = String;
 
 type ExtendedHelloLine = String;
 
-enum SMTPResponse {
-    ExtendedHelloOkResponse(Domain, Option<ExtendedHelloGreet>, Vec<ExtendedHelloLine>),
+enum SMTPResponse<'a> {
+    ExtendedHelloOkResponse(Domain<'a>, Option<ExtendedHelloGreet>, Vec<ExtendedHelloLine>),
 }
 
 
