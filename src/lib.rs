@@ -1,6 +1,5 @@
 use std::collections::BTreeMap;
 use std::io::prelude::*;
-use std::fs::File;
 
 enum DomainOrIPAddressLiteral<'a> {
     ADomain(Domain<'a>),
@@ -72,9 +71,8 @@ enum SMTPCommand<'a> {
     Quit,
 }
 
-fn helo(stream: Write) -> std::io::Result<usize> {
-  let mut helo_string = "HELO";
-  stream.write(helo_string);
+fn helo(stream: &mut Write) -> std::io::Result<usize> {
+  stream.write("HELO".as_bytes())
 }
 
 type ExtendedHelloGreet = String;
@@ -123,9 +121,13 @@ fn it_works() {
 
 #[test]
 fn helo_writes() {
-    let mut stream = try!(File::create("helo_output"));
+    use std::fs::File;
+
+    let mut write_stream = File::create("helo_output").ok().unwrap();
     let mut content = String::new();
-    helo(stream);
-    stream.read_to_string(&mut content);
+    assert_eq!(4, helo(&mut write_stream).ok().unwrap());
+    write_stream.flush();
+    let mut read_stream = File::open("helo_output").ok().unwrap();
+    assert_eq!(4, read_stream.read_to_string(&mut content).ok().unwrap());
     assert_eq!("HELO", content);
 }
