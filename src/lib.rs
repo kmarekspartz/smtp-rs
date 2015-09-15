@@ -71,8 +71,8 @@ enum SMTPCommand<'a> {
     Quit,
 }
 
-fn helo(stream: &mut Write) -> std::io::Result<usize> {
-    stream.write("HELO".as_bytes())
+fn serialize_helo(domain: &str) -> String {
+    format!("HELO {}", domain)
 }
 
 type ExtendedHelloGreet = String;
@@ -81,6 +81,17 @@ type ExtendedHelloLine = String;
 
 enum SMTPResponse<'a> {
     ExtendedHelloOkResponse(Domain<'a>, Option<ExtendedHelloGreet>, Vec<ExtendedHelloLine>),
+}
+
+fn serialize(command: SMTPCommand) -> String {
+    match command {
+        SMTPCommand::Hello(domain) => serialize_helo(domain),
+        _ => "OOPS!".to_string(),
+    }
+}
+
+fn send_command(stream: &mut Write, command: SMTPCommand) -> std::io::Result<usize> {
+    stream.write(serialize(command).as_bytes())
 }
 
 
@@ -120,14 +131,23 @@ fn it_works() {
 }
 
 #[test]
-fn helo_writes() {
+fn send_command_sends_hello() {
     use std::fs::File;
 
     let mut write_stream = File::create("helo_output").ok().unwrap();
     let mut content = String::new();
-    assert_eq!(4, helo(&mut write_stream).ok().unwrap());
+    let hello = SMTPCommand::Hello("mail.google.com");
+    assert_eq!(20, send_command(&mut write_stream, hello).ok().unwrap());
     write_stream.flush();
     let mut read_stream = File::open("helo_output").ok().unwrap();
-    assert_eq!(4, read_stream.read_to_string(&mut content).ok().unwrap());
-    assert_eq!("HELO", content);
+    assert_eq!(20, read_stream.read_to_string(&mut content).ok().unwrap());
+    assert_eq!("HELO mail.google.com", content);
+}
+
+#[test]
+fn hello_serializes() {
+    let hello_google = SMTPCommand::Hello("mail.google.com");
+    let hello_yahoo = SMTPCommand::Hello("mail.yahoo.com");
+    assert_eq!("HELO mail.google.com", serialize(hello_google));
+    assert_eq!("HELO mail.yahoo.com", serialize(hello_yahoo));
 }
