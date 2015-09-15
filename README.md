@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/zeckalpha/smtp-rs.png?label=ready&title=Ready)](https://waffle.io/zeckalpha/smtp-rs)
 # smtp-rs
 
 A barebones SMTP library for both clients and servers.
