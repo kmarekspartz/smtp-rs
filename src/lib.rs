@@ -1,27 +1,29 @@
 use std::collections::BTreeMap;
 use std::io::prelude::*;
 
-enum DomainOrIPAddressLiteral<'a> {
-    ADomain(Domain<'a>),
-    IPAddressLiteral(&'a str),
+enum DomainOrIPAddressLiteral {
+    ADomain(Domain),
+    IPAddressLiteral(String), // TODO: Better type
 }
 
 // TODO: Better type:
-type Domain<'a> = &'a str;
+type Domain = String;
 
+// TODO: Better type:
 type Postmaster = String;
-fn postmaster() {
-    "Postmaster";
+
+fn postmaster() -> String {
+    "Postmaster".to_string()
 }
 
-enum AddressOrPostmaster<'a> {
-    AnAddress(Address<'a>),
+enum AddressOrPostmaster {
+    AnAddress(Address),
     Postmaster,
 }
 
-struct Address<'a> {
-    local_part: &'a str, // TODO: own type
-    domain: Domain<'a>,
+struct Address {
+    local_part: String, // TODO: Better type
+    domain: Domain,
 }
 
 enum OneOrMore<T> {
@@ -31,56 +33,57 @@ enum OneOrMore<T> {
 
 enum ProtocolExtension {
     EightBitMIME,
+    // TODO: List more
 }
 
-struct Envelope<'a> {
-    originator: Address<'a>,
-    recipients: OneOrMore<Address<'a>>,
-    protocol_extensions: Vec<ProtocolExtension>
+struct Envelope {
+    originator: Address,
+    recipients: OneOrMore<Address>,
+    protocol_extensions: Vec<ProtocolExtension>,
 }
 
-struct Header<'a> {
-    fields: BTreeMap<&'a str, &'a str> // Case-insensitivity
+struct Header {
+    fields: BTreeMap<String, String>, // TODO: Case-insensitivity
 }
 
-struct Content<'a> {
-    header: Header<'a>,
-    body: &'a str, // TODO: own type
+struct Content {
+    header: Header,
+    body: String, // TODO: Better type
 }
 
-struct MailObject<'a> {
-    envelope: Envelope<'a>,
-    content: Content<'a>,
+struct MailObject {
+    envelope: Envelope,
+    content: Content,
 }
 
+ // TODO: Better types:
 type ReversePath = String;
 type MailParameter = String;
 type RecipientParameter = String;
 
-enum SMTPCommand<'a> {
-    Hello(Domain<'a>),
-    ExtendedHello(DomainOrIPAddressLiteral<'a>),
+enum SMTPCommand {
+    Hello(Domain),
+    ExtendedHello(DomainOrIPAddressLiteral),
     Mail(ReversePath, Vec<MailParameter>),
-    Recipient(Vec<AddressOrPostmaster<'a>>, Vec<RecipientParameter>),
+    Recipient(Vec<AddressOrPostmaster>, Vec<RecipientParameter>),
     Data,
     Reset,
-    Verify(String),
-    Expand(String),
-    Help(Option<String>),
-    NoOp(Option<String>),
+    Verify(String), // TODO: Better type
+    Expand(String), // TODO: Better type
+    Help(Option<String>), // TODO: Better type
+    NoOp(Option<String>), // TODO: Better type
     Quit,
 }
 
-fn serialize_helo(domain: &str) -> String {
+fn serialize_helo(domain: Domain) -> String {
     format!("HELO {}", domain)
 }
 
-type ExtendedHelloGreet = String;
+type ExtendedHelloGreet = String; // TODO: Better type
+type ExtendedHelloLine = String; // TODO: Better type
 
-type ExtendedHelloLine = String;
-
-enum SMTPResponse<'a> {
-    ExtendedHelloOkResponse(Domain<'a>, Option<ExtendedHelloGreet>, Vec<ExtendedHelloLine>),
+enum SMTPResponse {
+    ExtendedHelloOkResponse(Domain, Option<ExtendedHelloGreet>, Vec<ExtendedHelloLine>),
 }
 
 fn serialize(command: SMTPCommand) -> String {
@@ -100,15 +103,15 @@ fn it_works() {
     let mail_object = MailObject {
         envelope: Envelope {
             originator: Address {
-                local_part: "kyle.marek.spartz",
-                domain: "gmail.com",
+                local_part: "kyle.marek.spartz".to_string(),
+                domain: "gmail.com".to_string(),
             },
             recipients: OneOrMore::More(Address {
-                    local_part: "zeckalpha",
-                    domain: "gmail.com",
+                    local_part: "zeckalpha".to_string(),
+                    domain: "gmail.com".to_string(),
                 }, Box::new(OneOrMore::One(Address {
-                    local_part: "kyle",
-                    domain: "marek-spartz.org",
+                    local_part: "kyle".to_string(),
+                    domain: "marek-spartz.org".to_string(),
                 }))
             ),
             protocol_extensions: vec![
@@ -119,12 +122,12 @@ fn it_works() {
             header: Header {
                 fields: {
                     let mut fields = BTreeMap::new();
-                    fields.insert("orig-date", "...");
-                    fields.insert("from", "kyle.marek.spartz@gmail.com");
+                    fields.insert("orig-date".to_string(), "...".to_string());
+                    fields.insert("from".to_string(), "kyle.marek.spartz@gmail.com".to_string());
                     fields
                 }
             },
-            body: "LOL"
+            body: "LOL".to_string()
         }
     };
     assert_eq!("LOL", mail_object.content.body);
@@ -136,7 +139,7 @@ fn send_command_sends_hello() {
 
     let mut write_stream = File::create("helo_output").ok().unwrap();
     let mut content = String::new();
-    let hello = SMTPCommand::Hello("mail.google.com");
+    let hello = SMTPCommand::Hello("mail.google.com".to_string());
     assert_eq!(20, send_command(&mut write_stream, hello).ok().unwrap());
     write_stream.flush();
     let mut read_stream = File::open("helo_output").ok().unwrap();
@@ -146,8 +149,8 @@ fn send_command_sends_hello() {
 
 #[test]
 fn hello_serializes() {
-    let hello_google = SMTPCommand::Hello("mail.google.com");
-    let hello_yahoo = SMTPCommand::Hello("mail.yahoo.com");
+    let hello_google = SMTPCommand::Hello("mail.google.com".to_string());
+    let hello_yahoo = SMTPCommand::Hello("mail.yahoo.com".to_string());
     assert_eq!("HELO mail.google.com", serialize(hello_google));
     assert_eq!("HELO mail.yahoo.com", serialize(hello_yahoo));
 }
