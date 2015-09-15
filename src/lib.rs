@@ -72,7 +72,7 @@ enum SMTPCommand<'a> {
 }
 
 fn helo(stream: &mut Write) -> std::io::Result<usize> {
-  stream.write("HELO".as_bytes())
+    stream.write("HELO".as_bytes())
 }
 
 type ExtendedHelloGreet = String;
