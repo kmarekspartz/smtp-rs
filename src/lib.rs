@@ -79,6 +79,15 @@ fn serialize_helo(domain: Domain) -> String {
     format!("HELO {}", domain)
 }
 
+fn serialize_ehlo(domain_or_ip_address_literal: DomainOrIPAddressLiteral) -> String {
+    let host = match domain_or_ip_address_literal {
+        DomainOrIPAddressLiteral::ADomain(domain) => domain,
+        DomainOrIPAddressLiteral::IPAddressLiteral(ip) => ip,
+    };
+    format!("EHLO {}", host)
+
+}
+
 type ExtendedHelloGreet = String; // TODO: Better type
 type ExtendedHelloLine = String; // TODO: Better type
 
@@ -89,6 +98,7 @@ enum SMTPResponse {
 fn serialize(command: SMTPCommand) -> String {
     match command {
         SMTPCommand::Hello(domain) => serialize_helo(domain),
+        SMTPCommand::ExtendedHello(domain_or_ip_address_literal) => serialize_ehlo(domain_or_ip_address_literal),
         _ => "OOPS!".to_string(),
     }
 }
@@ -153,4 +163,12 @@ fn hello_serializes() {
     let hello_yahoo = SMTPCommand::Hello("mail.yahoo.com".to_string());
     assert_eq!("HELO mail.google.com", serialize(hello_google));
     assert_eq!("HELO mail.yahoo.com", serialize(hello_yahoo));
+}
+
+#[test]
+fn extended_hello_serializes() {
+    let extended_hello_google = SMTPCommand::ExtendedHello(DomainOrIPAddressLiteral::ADomain("mail.google.com".to_string()));
+    let extended_hello_yahoo = SMTPCommand::ExtendedHello(DomainOrIPAddressLiteral::ADomain("mail.yahoo.com".to_string()));
+    assert_eq!("EHLO mail.google.com", serialize(extended_hello_google));
+    assert_eq!("EHLO mail.yahoo.com", serialize(extended_hello_yahoo));
 }
