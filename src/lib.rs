@@ -28,12 +28,11 @@ struct Address<'a> {
 
 enum OneOrMore<T> {
     One(T),
-    More(T,Box<OneOrMore<T>>),
+    More(T, Box<OneOrMore<T>>),
 }
 
 enum ProtocolExtension {
-    EightBitMIME,
-    // TODO: List more
+    EightBitMIME, // TODO: List more
 }
 
 struct Envelope<'a> {
@@ -56,7 +55,7 @@ struct MailObject<'a> {
     content: Content<'a>,
 }
 
- // TODO: Better types:
+// TODO: Better types:
 type ReversePath<'a> = &'a str;
 type MailParameter<'a> = &'a str;
 type RecipientParameter<'a> = &'a str;
@@ -117,16 +116,16 @@ fn it_works() {
                 domain: "gmail.com",
             },
             recipients: OneOrMore::More(Address {
-                    local_part: "zeckalpha",
-                    domain: "gmail.com",
-                }, Box::new(OneOrMore::One(Address {
-                    local_part: "kyle",
-                    domain: "marek-spartz.org",
-                }))
-            ),
+                                            local_part: "zeckalpha",
+                                            domain: "gmail.com",
+                                        },
+                                        Box::new(OneOrMore::One(Address {
+                                            local_part: "kyle",
+                                            domain: "marek-spartz.org",
+                                        }))),
             protocol_extensions: vec![
                 ProtocolExtension::EightBitMIME,
-            ]
+            ],
         },
         content: Content {
             header: Header {
@@ -135,10 +134,10 @@ fn it_works() {
                     fields.insert("orig-date", "...");
                     fields.insert("from", "kyle.marek.spartz@gmail.com");
                     fields
-                }
+                },
             },
-            body: "LOL"
-        }
+            body: "LOL",
+        },
     };
     assert_eq!("LOL", mail_object.content.body);
 }
