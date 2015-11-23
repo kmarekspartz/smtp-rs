@@ -164,6 +164,7 @@ fn send_command_sends_hello() {
 fn hello_serializes() {
     let hello_google = SMTPCommand::Hello("mail.google.com");
     let hello_yahoo = SMTPCommand::Hello("mail.yahoo.com");
+
     assert_eq!("HELO mail.google.com", serialize(hello_google));
     assert_eq!("HELO mail.yahoo.com", serialize(hello_yahoo));
 }
@@ -172,6 +173,7 @@ fn hello_serializes() {
 fn extended_hello_serializes() {
     let extended_hello_google = SMTPCommand::ExtendedHello(DomainOrIPAddressLiteral::ADomain("mail.google.com"));
     let extended_hello_yahoo = SMTPCommand::ExtendedHello(DomainOrIPAddressLiteral::ADomain("mail.yahoo.com"));
+
     assert_eq!("EHLO mail.google.com", serialize(extended_hello_google));
     assert_eq!("EHLO mail.yahoo.com", serialize(extended_hello_yahoo));
 }
