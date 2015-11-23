@@ -2,3 +2,6 @@
 name = "smtp"
 version = "0.1.0"
 authors = ["Kyle Marek-Spartz <kyle.marek.spartz@gmail.com>"]
+
+[dependencies]
+tempfile = "1.1.3"

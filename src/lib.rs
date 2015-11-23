@@ -144,15 +144,19 @@ fn it_works() {
 
 #[test]
 fn send_command_sends_hello() {
-    use std::fs::File;
+    extern crate tempfile;
+    use std::io::{Write, Read, Seek, SeekFrom};
 
-    let mut write_stream = File::create("helo_output").ok().unwrap();
+    let mut temp_file = tempfile::TempFile::new().unwrap();
     let mut content = String::new();
     let hello = SMTPCommand::Hello("mail.google.com");
-    assert_eq!(20, send_command(&mut write_stream, hello).ok().unwrap());
-    write_stream.flush();
-    let mut read_stream = File::open("helo_output").ok().unwrap();
-    assert_eq!(20, read_stream.read_to_string(&mut content).ok().unwrap());
+
+    assert_eq!(20, send_command(&mut temp_file, hello).ok().unwrap());
+
+    temp_file.flush();
+    temp_file.seek(SeekFrom::Start(0)).unwrap();
+
+    assert_eq!(20, temp_file.read_to_string(&mut content).ok().unwrap());
     assert_eq!("HELO mail.google.com", content);
 }
 
