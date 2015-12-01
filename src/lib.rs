@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::collections::BTreeMap;
 use std::io::prelude::*;
 
@@ -153,7 +155,7 @@ fn send_command_sends_hello() {
 
     assert_eq!(20, send_command(&mut temp_file, hello).ok().unwrap());
 
-    temp_file.flush();
+    let _ = temp_file.flush();
     temp_file.seek(SeekFrom::Start(0)).unwrap();
 
     assert_eq!(20, temp_file.read_to_string(&mut content).ok().unwrap());
