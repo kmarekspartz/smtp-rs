@@ -2,6 +2,8 @@
 name = "smtp"
 version = "0.1.0"
 authors = ["Kyle Marek-Spartz <kyle.marek.spartz@gmail.com>"]
+repository = "https://github.com/zeckalpha/smtp-rs"
+license = "MIT"
 
 [dependencies]
 tempfile = "1.1.3"
